@@ -1,0 +1,930 @@
+#!/usr/bin/env file .
+
+# -*- Coding: UTF-8 -*-
+# -*- System: Linux -*-
+# -*- Usage:   *.*  -*-
+
+# Owner:    Jacob B. Sanders
+# License:  BSD 2-Clause License
+# Website:  code.cloud-technology.io
+
+#
+# Copyright 2020, Jacob B. Sanders - Cloud Hybrid LLC. & Affiliates
+#
+# Redistribution and use in source and binary forms, with or without modification, are permitted
+# provided that the following conditions are met:
+#
+# 1.  Redistributions of source code must retain the above copyright notice, this list of
+#     conditions and the following disclaimer.
+#
+# 2.   Redistributions in binary form must reproduce the above copyright notice, this list of
+#      conditions and the following disclaimer in the documentation and/or other materials
+#      provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+# OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+# AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER
+# OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+# OF SUCH DAMAGE.
+#
+
+# --> Project Specific
+
+*.ignore
+
+#
+# =================================================================================================
+# Cloud-Technology Universal .gitignore
+# =================================================================================================
+#
+# The following sections will contain directories, files, & wildcards relating
+# to special rules that either force include or prevent file-descriptors
+# from being tracked via source [version] control.
+#
+# Note: Sections may contain duplicates -- which is intentional. Usage can
+#       simply include the entire file, or copy-and-pasted sections.
+#
+# General Section Stucture
+# -------------------------
+# >>> # [File]
+# >>> # [Folder]/
+# >>> # .[Dot-File]
+# >>> # .[Dot-Folder]/
+# >>> # *[Wild-Card-File]
+# >>> # *[Wild-Card-Folder]/
+# >>> # *.[Wild-Card-Dot-File]
+# >>> # *.[Wild-Card-Dot-Folder]/
+#
+
+#
+# ============================================================================
+# Python
+# ============================================================================
+#
+# References
+# -----------
+# PEP: https://github.com/github/gitignore/blob/master/Python.gitignore
+# VirtualEnv: https://github.com/github/gitignore/blob/master/Global/VirtualEnv.gitignore
+#
+# Table of Contents
+# ------------------
+#  ├── Byte Compilations
+#  ├── C Extensions
+#  ├── PyInstaller
+#  ├── Logging
+#  ├── PyBuilder
+#  ├── Unit  Testing
+#  ├── Translations
+#  ├── Django
+#  ├── Flask
+#  ├── Scrapy
+#  ├── Jupyter
+#  ├── IPython
+#  ├── Sphinx
+#  ├── Packaging
+#  ├── Celery
+#  ├── Virtual Environments
+#  ├── Environments
+#  ├── Static Typing
+#  ├── Debug Symbols
+#
+
+
+.Remote
+.env
+
+# ----------------------------------------------------------------------------
+# Byte Compilations                                                   (Python)
+# -----------------------------------------------------------------------------
+
+__pycache__
+
+*.py[cod]
+*$py.class
+
+# -----------------------------------------------------------------------------
+# C Extensions                                                        (Python)
+# -----------------------------------------------------------------------------
+
+*.so
+
+# -----------------------------------------------------------------------------
+# PyInstaller                                                         (Python)
+# -----------------------------------------------------------------------------
+
+*.manifest
+*.spec
+
+# -----------------------------------------------------------------------------
+# Logging                                                             (Python)
+# -----------------------------------------------------------------------------
+
+pip-log.txt
+pip-delete-this-directory.txt
+
+*.log
+
+# ------------------------------------------------------------------------------
+# PyBuilder                                                            (Python)
+# ------------------------------------------------------------------------------
+
+target/
+
+.pybuilder/
+
+# -----------------------------------------------------------------------------
+# Unit Testing                                                        (Python)
+# -----------------------------------------------------------------------------
+
+coverage.xml
+nosetests.xml
+
+site/
+cover/
+htmlcov/
+
+.cache
+.coverage
+.coverage.*
+.tox/
+.nox/
+.hypothesis/
+.pytest_cache/
+
+*.cover
+*.py.cover
+
+# -----------------------------------------------------------------------------
+# Translations                                                        (Python)
+# -----------------------------------------------------------------------------
+
+*.mo
+*.pot
+
+# -----------------------------------------------------------------------------
+# Django                                                              (Python)
+# -----------------------------------------------------------------------------
+
+db.sqlite3
+db.sqlite3-journal
+
+local_settings.py
+
+*.log
+
+# -----------------------------------------------------------------------------
+# Flask                                                               (Python)
+# -----------------------------------------------------------------------------
+
+instance/
+
+.env
+.flask
+.token
+.flask-token
+.webassets-cache
+
+# -----------------------------------------------------------------------------
+# Scrapy                                                              (Python)
+# -----------------------------------------------------------------------------
+
+.scrapy
+
+# -----------------------------------------------------------------------------
+# Jupyter                                                             (Python)
+# -----------------------------------------------------------------------------
+
+.ipynb_checkpoints
+
+# -----------------------------------------------------------------------------
+# IPython                                                             (Python)
+# -----------------------------------------------------------------------------
+
+ipython_config.py
+
+profile_default/
+
+# -----------------------------------------------------------------------------
+# Sphinx                                                              (Python)
+# -----------------------------------------------------------------------------
+
+docs/
+_build/
+source/
+
+# -----------------------------------------------------------------------------
+# Packaging                                                     (Python)
+# -----------------------------------------------------------------------------
+
+MANIFEST
+
+MANIFEST.in
+
+lib
+var
+dist
+eggs
+build
+Build
+lib64
+parts
+sdist
+wheels
+downloads
+develop-eggs
+pip-wheel-metadata
+share/python-wheels
+
+__pypackages__
+__pycache__
+
+.Python
+.installed.cfg
+
+.eggs
+
+*.egg
+*.whl
+
+*.dist-info
+
+*.egg-info
+*.egg-info/
+*.egg-info/*
+
+**/*.egg-info
+**/*.egg-info/
+**/*.egg-info/*
+
+**/*/*.egg-info
+**/*/*.egg-info/
+**/*/*.egg-info/*
+
+*.pyc
+
+# -----------------------------------------------------------------------------
+# Celery                                                              (Python)
+# -----------------------------------------------------------------------------
+
+celerybeat-schedule
+celerybeat.pid
+
+# -----------------------------------------------------------------------------
+# Virtual Environments                                                (Python)
+# -----------------------------------------------------------------------------
+
+.Python
+
+pyvenv.cfg
+Pipfile.lock
+pip-selfcheck.json
+
+.python-version
+
+.venv/
+.Virtual-Environment/
+.Virtualization/
+
+[Bb]in
+[Ii]nclude
+[Ll]ib
+[Ll]ib64
+[Ll]ocal
+[Ss]cripts
+
+# -----------------------------------------------------------------------------
+# Environments                                                        (Python)
+# -----------------------------------------------------------------------------
+
+.env
+.venv
+Environment.env
+
+env
+venv
+ENV
+env.bak
+venv.bak
+
+*.lock
+*.Lock
+*.LOCK
+
+# -----------------------------------------------------------------------------
+# Static Typing                                                       (Python)
+# -----------------------------------------------------------------------------
+
+.pytype/
+
+# -----------------------------------------------------------------------------
+# Debug Symbols                                                       (Python)
+# -----------------------------------------------------------------------------
+
+.cython_debug
+
+# -----------------------------------------------------------------------------
+# Settings & Build                                                    (Python)
+# -----------------------------------------------------------------------------
+
+setup.cfg
+
+Static.zip
+
+#
+# ============================================================================
+# C
+# ============================================================================
+# Python is a run-time language developed through C-Python (C). Therefore,
+# some .gitignore C files may contain python-related contexts.
+#
+# References
+# -----------
+# GitHub: https://github.com/github/gitignore/blob/master/C.gitignore
+#
+# Table of Contents
+# ------------------
+#  ├── Prerequisites
+#  ├── C Extensions (Python)
+#  ├── Object files
+#  ├── Linker Output
+#  ├── Precompiled Headers
+#  ├── Libraries
+#  ├── Shared Objects (Windows)
+#  ├── Executables
+#  ├── Debug Files
+#  ├── Kernel Module Compilations
+#  ├── Core Dumps
+#
+
+# -----------------------------------------------------------------------------
+# Prerequisites                                       (C Programming Language)
+# -----------------------------------------------------------------------------
+
+*.d
+
+# -----------------------------------------------------------------------------
+# Object files                                        (C Programming Language)
+# -----------------------------------------------------------------------------
+
+*.o
+*.ko
+*.obj
+*.elf
+
+# -----------------------------------------------------------------------------
+# Linker output                                       (C Programming Language)
+# -----------------------------------------------------------------------------
+
+*.ilk
+*.map
+*.exp
+
+# -----------------------------------------------------------------------------
+# Precompiled Headers                                 (C Programming Language)
+# -----------------------------------------------------------------------------
+
+*.gch
+*.pch
+
+# -----------------------------------------------------------------------------
+# Libraries                                           (C Programming Language)
+# -----------------------------------------------------------------------------
+
+*.lib
+*.a
+*.la
+*.lo
+
+# -----------------------------------------------------------------------------
+# Shared objects (inc. Windows DLLs)                  (C Programming Language)
+# -----------------------------------------------------------------------------
+
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# -----------------------------------------------------------------------------
+# Executables                                         (C Programming Language)
+# -----------------------------------------------------------------------------
+
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# -----------------------------------------------------------------------------
+# Debug files                                         (C Programming Language)
+# -----------------------------------------------------------------------------
+
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# -----------------------------------------------------------------------------
+# Kernel Module Compile Results                       (C Programming Language)
+# -----------------------------------------------------------------------------
+
+dkms.conf
+modules.order
+Module.symvers
+Mkfile.old
+
+.tmp_versions
+
+*.cmd
+*.mod*
+
+# -----------------------------------------------------------------------------
+# Core Dumps                                          (C Programming Language)
+# -----------------------------------------------------------------------------
+
+core
+
+#
+# ============================================================================
+# Integrated Development Environments (IDEs)
+# ============================================================================
+#
+# References
+# -----------
+# GitHub: https://github.com/github/gitignore/blob/master/C.gitignore
+#
+# Table of Contents
+# ------------------
+#  ├── Visual Studio Code
+#  ├── X-Code
+#  │    ├── User settings
+#  │    ├── Legacy X-Code IDEs
+#  │    ├── GCC
+#  ├── Jet-Brains
+#  │    ├── User
+#  │    ├── Generated files
+#  │    ├── Sensitive or high-churn files
+#  │    ├── Gradle
+#  │    ├── ( Gradle || Maven ) && Auto-Import
+#  │    ├── CMake
+#  │    ├── Mongo Explorer plugin
+#  │    ├── File Project Format
+#  │    ├── IntelliJ
+#  │    ├── Modules
+#  │    ├── Jira
+#  │    ├── Android Studio
+#  │    ├── Editor-based Rest Client
+#  │    ├── Android Studio 3.1+ Serialized Cache File
+#
+
+# -----------------------------------------------------------------------------
+# Visual Studio Code                                                    (IDEs)
+# -----------------------------------------------------------------------------
+
+.history/
+.vscode/*
+*.code-workspace
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# -----------------------------------------------------------------------------
+# X-Code                                                                (IDEs)
+# -----------------------------------------------------------------------------
+
+# --> User settings
+xcuserdata
+
+# --> Legacy X-Code IDEs
+build
+DerivedData
+*.xcscmblueprint
+*.xccheckout
+*.moved-aside
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+
+!default.pbxuser
+!default.mode1v3
+!default.mode2v3
+!default.perspectivev3
+
+# --> GCC
+/*.gcno
+
+# -----------------------------------------------------------------------------
+# Jet-Brains (IDEA, PyCharm, etc.)                                      (IDEs)
+# -----------------------------------------------------------------------------
+
+# --> IDE Settings
+
+**/.idea
+**/.idea/
+**/.idea/*
+
+**/*.idea
+**/*.idea/
+**/*.idea/*
+
+# --> User
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+
+# --> Generated files
+.idea/**/contentModel.xml
+
+# --> Sensitive or high-churn files
+.idea/**/dataSources
+.idea/**/dataSources.ids
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+.idea/**/dbnavigator.xml
+
+# --> Gradle
+.idea/**/gradle.xml
+.idea/**/libraries
+
+# --> ( Gradle || Maven ) && Auto-Import
+.idea/artifacts
+.idea/compiler.xml
+.idea/jarRepositories.xml
+.idea/modules.xml
+.idea/*.iml
+.idea/modules
+*.iml
+*.ipr
+
+# --> CMake
+cmake-build-*
+
+# --> Mongo Explorer plugin
+.idea/**/mongoSettings.xml
+
+# --> File Project Format
+*.iws
+
+# --> IntelliJ
+out
+
+# --> Modules
+.idea_modules
+
+# --> Jira
+atlassian-ide-plugin.xml
+
+# --> Android Studio
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+fabric.properties
+
+# --> Editor-based Rest Client
+.idea/httpRequests
+
+# --> Android Studio 3.1+ Serialized Cache File
+.idea/caches/build_file_checksums.ser
+
+#
+# ============================================================================
+# MacOS System Files
+# ============================================================================
+#
+# Table of Contents
+# ------------------
+# N/A
+#
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+Icon
+
+*.hmap
+
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+timeline.xctimeline
+playground.xcworkspace
+
+Carthage/Build
+
+.accio
+
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+iOSInjectionProject
+
+._*
+
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+.apdisk
+.AppleDB
+.AppleDesktop
+
+Network Trash Folder
+
+Temporary Items
+
+#
+# ============================================================================
+# Go
+# ============================================================================
+#
+# Table of Contents
+# ------------------
+#  ├── Executables
+#  ├── Libraries
+#  ├── Coverage & Testing
+#  ├── Logging
+#
+
+# -----------------------------------------------------------------------------
+# Executables                                        (Go Programming Language)
+# -----------------------------------------------------------------------------
+
+*.exe
+*.exe~
+
+# -----------------------------------------------------------------------------
+# Libraries                                          (Go Programming Language)
+# -----------------------------------------------------------------------------
+
+*.dll
+*.dll
+*.dylib
+
+# -----------------------------------------------------------------------------
+# Coverage & Testing                                 (Go Programming Language)
+# -----------------------------------------------------------------------------
+
+*.test
+
+# -----------------------------------------------------------------------------
+# Logging                                            (Go Programming Language)
+# -----------------------------------------------------------------------------
+
+*.out
+
+#
+# ============================================================================
+# Discord API & Bot Development
+# ============================================================================
+#
+# Table of Contents
+# ------------------
+# N/A
+#
+
+Discord-Token
+Discord-Token.env
+Discord-Token.Environment
+
+Token
+Token.env
+Token.Environment
+
+Discord.Token
+
+.Discord
+.Token
+.Discord-Token
+
+# -----------------------------------------------------------------------------
+# Installers                                                         (Discord)
+# -----------------------------------------------------------------------------
+
+*.deb
+*.debian
+
+#
+# ============================================================================
+# Java
+# ============================================================================
+#
+# References
+# -----------
+# GitHub: https://github.com/github/gitignore/blob/master/Java.gitignore
+#
+# Table of Contents
+# ------------------
+#  ├── Compilations
+#  ├── Logging
+#  ├── BlueJ
+#  ├── Mobile Tools (J2ME)
+#  ├── Package Files
+#
+
+# -----------------------------------------------------------------------------
+# Compilations                                     (Java Programming Language)
+# -----------------------------------------------------------------------------
+
+*.class
+
+# -----------------------------------------------------------------------------
+# Logging                                          (Java Programming Language)
+# -----------------------------------------------------------------------------
+
+hs_err_pid*
+
+*.log
+
+# -----------------------------------------------------------------------------
+# BlueJ                                            (Java Programming Language)
+# -----------------------------------------------------------------------------
+
+*.ctxt
+
+# -----------------------------------------------------------------------------
+# Mobile Tools (J2ME)                              (Java Programming Language)
+# -----------------------------------------------------------------------------
+
+.mtj.tmp/
+
+# -----------------------------------------------------------------------------
+# Package Files                                    (Java Programming Language)
+# -----------------------------------------------------------------------------
+
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+#
+# ============================================================================
+# Cloud-Technology & Cloud-Hybrid LLC.(s)
+# ============================================================================
+#
+# Table of Contents
+# ------------------
+#  ├── Process Management
+#  ├── File Buffers
+#  ├── Automation
+#
+
+# -----------------------------------------------------------------------------
+# Process Management                                    (LLC.(s) & Affiliates)
+# -----------------------------------------------------------------------------
+
+PID.lock
+PID.Lock
+PID.LOCK
+
+CID.lock
+CID.Lock
+CID.LOCK
+
+Process.lock
+Process.Lock
+Process.LOCK
+
+Parent.lock
+Parent.Lock
+Parent.LOCK
+
+# -----------------------------------------------------------------------------
+# File Buffers                                          (LLC.(s) & Affiliates)
+# -----------------------------------------------------------------------------
+
+*~*
+
+*.socket
+*.Socket
+*.SOCKET
+
+Discord-Log.UTF-8
+
+# -----------------------------------------------------------------------------
+# Automation                                            (LLC.(s) & Affiliates)
+# -----------------------------------------------------------------------------
+
+*.unix
+
+Environment.Properties
+
+# -----------------------------------------------------------------------------
+# Git                                                   (LLC.(s) & Affiliates)
+# -----------------------------------------------------------------------------
+
+Build/*
+Build/**
+
+*/Build/**
+
+**/Build/**
+
+Library/*
+Metrics/*
+Distribution/*
+
+# -----------------------------------------------------------------------------
+# Sensitive File(s) & Configuration                     (LLC.(s) & Affiliates)
+# -----------------------------------------------------------------------------
+
+TOKEN
+Token
+token
+
+.TOKEN
+.Token
+.token
+
+*.TOKEN
+*.Token
+*.token
+
+.secret
+.Secret
+.SECRET
+
+.secrets
+.Secrets
+.SECRETS
+
+*.secret
+*.Secret
+*.SECRET
+
+*.secrets
+*.Secrets
+*.SECRETS
+
+# -----------------------------------------------------------------------------
+# Exclusions                                            (LLC.(s) & Affiliates)
+# -----------------------------------------------------------------------------
+
+!Artifact/Applications
+!Artifact/Applications/AWS
+!Artifact/Applications/CMX
+!Artifact/Applications/Socket
+!Artifact/Applications/Utilities
+!Artifact/Applications/Virtualization
+
+!./**/Statistics.js
+!./**/Statistics-*.js
+!./**/Statistics-*-*.js
+
+# -----------------------------------------------------------------------------
+# Application                                           (LLC.(s) & Affiliates)
+# -----------------------------------------------------------------------------
+
+API/Configuration/Token
+
+Cloud-ASGI-Log.UTF-8
+
+Cloud_ASGI.egg-info
+
+*.egg-info
+*.egg-info/
+*.egg-info/*
+
+**/*.egg-info
+**/*.egg-info/
+**/*.egg-info/*
+
+**/*/*.egg-info
+**/*/*.egg-info/
+**/*/*.egg-info/*
+
+.idea
+.idea/
+.idea/*
+
+*.idea
+*.idea/
+*.idea/*
+
+**/.idea
+**/.idea/
+**/.idea/*
+
+**/*.idea
+**/*.idea/
+**/*.idea/*
