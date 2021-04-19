@@ -11,6 +11,8 @@ from dotenv import load_dotenv
 from tracker.events import EventListener
 from tracker.events import Event
 
+from tracker.mordhau_events import *  # This registers all Mordhau events for the listener and this project.
+
 log = logging.getLogger(__name__)
 root_path = Path(__file__).parent
 environment_path = root_path.parent / ".env"
