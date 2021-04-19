@@ -1,11 +1,14 @@
+import asyncio
+import time
 import os
 import sys
 import logging
 from pathlib import Path
 from logging import config
 
+import aiorcon.messages
 import yaml
-from srcds.rcon import RconConnection
+from aiorcon import RCON
 from dotenv import load_dotenv
 
 from tracker.events import EventListener
@@ -60,37 +63,36 @@ class Base:
         log.critical(f"A(n) RCON password (RCON_PASSWORD) was not set in the environment: \"{environment_path}\"")
         sys.exit(1)
 
-    try:
-        connection = RconConnection(ip, port=port, password=password,
-                                    single_packet_mode=True)
-        log.info(f"Connected to RCON: \"{ip}:{port}\"")
-    except Exception as error:
-        log.exception("Could not connect to the server")
-        sys.exit(1)
+    connection: RCON
 
     @classmethod
-    async def read(cls):
+    async def read(cls, buffer: aiorcon.messages.ResponseBuffer, keep_alive_prod: float = 30):
+        keep_alive_sent = time.time()
         while True:
-            yield cls.connection.read_response().body
+            if buffer.responses:
+                yield buffer.pop()
+            if (time.time() - keep_alive_sent) > keep_alive_prod:
+                log.info(f"Sending keep alive")
+                await cls.connection("info")
+                keep_alive_sent = time.time()
+            await asyncio.sleep(1)
 
     @staticmethod
     def format_mordhau_bytes(input: bytes) -> list[str]:
-        string = bytes(input[:-3]).decode("ascii", errors="ignore").encode("ascii", errors="ignore")
+        """Removes all non-ascii bytes from input and returns a split list of strings split on :"""
+        string = bytes(input).decode("ascii", errors="ignore").encode("ascii", errors="ignore")
         partials = string.decode(encoding="UTF-8").strip().replace("  ", " ").replace("\t", " ").split(":")
         return partials
 
     @classmethod
     async def run(cls):
+        cls.connection = await RCON.create(cls.ip, cls.port, cls.password, asyncio.get_event_loop(), multiple_packet=False)
         setup_logging()
         log.info(f"RCON connected to {cls.ip}:{cls.port}")
-        log.info("RCON info: " +
-                 " - ".join(":".join(cls.format_mordhau_bytes(cls.connection.exec_command("info"))).split("\n"))
-                 )
-        cls.connection.exec_command("listen allon")
-        RconConnection(cls.ip, port=cls.port, password=cls.password,
-                       single_packet_mode=True).exec_command("say Hello")
-        async for event in cls.read():
+        await cls.connection("listen allon")
+        async for event in cls.read(cls.connection.protocol._buffer):
+            event: aiorcon.messages.RCONMessage
             log.debug(f"Received RCON emission: {event}")
-            partials = cls.format_mordhau_bytes(event)
+            partials = cls.format_mordhau_bytes(event.body)
             log.debug(f"Received event: \"{':'.join(partials)}\"")
             await EventListener.parse_event(Event(name=partials[0], content=",".join(partials[1:]).strip()))
