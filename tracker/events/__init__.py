@@ -9,11 +9,14 @@ log = logging.getLogger(__name__)
 
 
 class EventType(enum.Enum):
-    login: str = "Login"
-    punishment: str = "Punishment"
-    match_state: str = "MatchState"
-    score_feed: str = "Scorefeed"
-    kill_feed: str = "Killfeed"
+    LOGIN: str = "Login"
+    PUNISHMENT: str = "Punishment"
+    MATCH_STATE: str = "MatchState"
+    SCORE_FEED: str = "Scorefeed"
+    KILL_FE: str = "Killfeed"
+
+    def __str__(self):
+        return self.value
 
 
 @dataclass
@@ -24,17 +27,15 @@ class Event:
 
 class EventListener:
     _listening_events: dict[str, list[callable]] = {}
-    _loaded_events: dict[str, list] = {}
 
     @classmethod
     def listen(cls, event: str):
+        event = str(event)
+
         def decorator(function):
-            if not cls._listening_events.get(event, None):
+            if not cls._listening_events.get(event):
                 cls._listening_events[event] = []
-                cls._loaded_events[event] = []
-            if function.__code__ not in cls._loaded_events[event]:
-                cls._listening_events[event].append(function)
-                cls._loaded_events[event].append(function.__code__)
+            cls._listening_events[event].append(function)
 
         return decorator
 
@@ -50,6 +51,6 @@ class EventListener:
             await asyncio.gather(*tasks)
 
 
-@EventListener.listen(EventType.match_state)
-async def another_state(event: Event):
-    log.info(event.content)
+# @EventListener.listen(EventType.match_state)
+# async def another_state(event: Event):
+#     log.info(event.content)
