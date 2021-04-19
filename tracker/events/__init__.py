@@ -10,8 +10,6 @@ class EventListener:
     _listening_events: dict[str, list[callable]] = {}
     _loaded_events: dict[str, list] = {}
 
-    queue = asyncio.Queue()
-
     @classmethod
     def listen(cls, event: str):
         def decorator(function):
