@@ -12,11 +12,6 @@ class EventListener:
 
     queue = asyncio.Queue()
 
-    @staticmethod
-    async def listening_events(events):
-        for event in events:
-            yield event
-
     @classmethod
     def listen(cls, event: str):
         def decorator(function):
