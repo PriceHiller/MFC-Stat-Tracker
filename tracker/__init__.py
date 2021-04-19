@@ -9,6 +9,7 @@ from srcds.rcon import RconConnection
 from dotenv import load_dotenv
 
 from tracker.events import EventListener
+from tracker.events import Event
 
 log = logging.getLogger(__name__)
 root_path = Path(__file__).parent
@@ -80,7 +81,7 @@ class Base:
     async def run(cls):
         setup_logging()
         log.info(f"RCON connected to {cls.ip}:{cls.port}")
-        log.info("INFO: " +
+        log.info("RCON info: " +
                  " - ".join(":".join(cls.format_mordhau_bytes(cls.connection.exec_command("info"))).split("\n"))
                  )
         cls.connection.exec_command("listen allon")
@@ -88,4 +89,4 @@ class Base:
             log.debug(f"Received RCON emission: {event}")
             partials = cls.format_mordhau_bytes(event)
             log.info(f"Received event: \"{':'.join(partials)}\"")
-            await EventListener.parse_event(partials[0], ", ".join(partials[1:]).strip())
+            await EventListener.parse_event(Event(name=partials[0], content=",".join(partials[1:]).strip()))
