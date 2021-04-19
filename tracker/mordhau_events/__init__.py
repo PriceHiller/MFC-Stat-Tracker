@@ -16,4 +16,9 @@ Example Listener Setup
 >>> __all__ = ["Test"]
 """
 
-__all__ = []
+from tracker.mordhau_events.Logging import LogEvents
+
+
+__all__ = [
+    "LogEvents"
+]

@@ -88,9 +88,9 @@ class Base:
                  )
         cls.connection.exec_command("listen allon")
         RconConnection(cls.ip, port=cls.port, password=cls.password,
-                       single_packet_mode=True).exec_command("changelevel skm_moshpit")
+                       single_packet_mode=True).exec_command("say Hello")
         async for event in cls.read():
             log.debug(f"Received RCON emission: {event}")
             partials = cls.format_mordhau_bytes(event)
-            log.info(f"Received event: \"{':'.join(partials)}\"")
+            log.debug(f"Received event: \"{':'.join(partials)}\"")
             await EventListener.parse_event(Event(name=partials[0], content=",".join(partials[1:]).strip()))

@@ -14,8 +14,6 @@ import logging
 
 from tracker import Base
 
-from . import *
-
 log = logging.getLogger(__name__)
 
 

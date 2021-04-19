@@ -51,11 +51,11 @@ class EventListener:
 
     @classmethod
     async def parse_event(cls, event: Event):
-        log.info(f"Parsing event: \"{event.name}\": \"{event.content}\"")
+        log.debug(f"Parsing event: \"{event.name}\": \"{event.content}\"")
         if events := cls._listening_events.get(event.name, None):
             tasks = []
             for listener in events:
-                log.info(f"Listener \"{listener.__module__}.{listener.__name__}\" handling "
-                         f"\"{event.name}: {event.content}\"")
+                log.debug(f"Listener \"{listener.__module__}.{listener.__name__}\" handling "
+                          f"\"{event.name}: {event.content}\"")
                 tasks.append(listener(event))
             await asyncio.gather(*tasks)
