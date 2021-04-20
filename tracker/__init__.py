@@ -72,7 +72,7 @@ class Base:
             if buffer.responses:
                 yield buffer.pop()
             if (time.time() - keep_alive_sent) > keep_alive_prod:
-                log.info(f"Sending keep alive")
+                log.debug(f"Sending keep alive")
                 await cls.connection("info")
                 keep_alive_sent = time.time()
             await asyncio.sleep(1)
@@ -92,7 +92,7 @@ class Base:
         await cls.connection("listen allon")
         async for event in cls.read(cls.connection.protocol._buffer):
             event: aiorcon.messages.RCONMessage
-            log.debug(f"Received RCON emission: {event}")
+            log.debug(f"Received RCON emission: {event.body}")
             partials = cls.format_mordhau_bytes(event.body)
             log.debug(f"Received event: \"{':'.join(partials)}\"")
             await EventListener.parse_event(Event(name=partials[0], content=",".join(partials[1:]).strip()))
