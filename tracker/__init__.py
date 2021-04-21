@@ -14,8 +14,6 @@ from dotenv import load_dotenv
 from tracker.events import EventListener
 from tracker.events import Event
 
-from tracker.mordhau_events import *  # This registers all Mordhau events for the listener and this project.
-
 log = logging.getLogger(__name__)
 root_path = Path(__file__).parent
 environment_path = root_path.parent / ".env"
@@ -48,20 +46,20 @@ class Base:
     ip = os.getenv("RCON_IP", default=None)
     if not ip:
         log.critical(f"A(n) IP address (RCON_IP) was not set in the environment: \"{environment_path}\"")
-        sys.exit(1)
+        sys.exit(128)
     port = os.getenv("RCON_PORT", default=None)
     if not port:
         log.critical(f"A(n) RCON port (RCON_PORT) was not set in the environment: \"{environment_path}\"")
-        sys.exit(1)
+        sys.exit(128)
     try:
         port = int(port)
     except ValueError:
         log.critical(f"The RCON port was not a valid port number, should be a WHOLE number (e.g. 123)!")
-        sys.exit(1)
+        sys.exit(128)
     password = os.getenv("RCON_PASSWORD", default=None)
     if not port:
         log.critical(f"A(n) RCON password (RCON_PASSWORD) was not set in the environment: \"{environment_path}\"")
-        sys.exit(1)
+        sys.exit(128)
 
     connection: RCON
 
@@ -73,26 +71,53 @@ class Base:
                 yield buffer.pop()
             if (time.time() - keep_alive_sent) > keep_alive_prod:
                 log.debug(f"Sending keep alive")
-                await cls.connection("info")
+                try:
+                    await cls.connection("info")
+                except Exception:
+                    log.exception(f"Sending keep alive failed.")
                 keep_alive_sent = time.time()
             await asyncio.sleep(1)
 
     @staticmethod
     def format_mordhau_bytes(input: bytes) -> list[str]:
         """Removes all non-ascii bytes from input and returns a split list of strings split on :"""
-        string = bytes(input).decode("ascii", errors="ignore").encode("ascii", errors="ignore")
-        partials = string.decode(encoding="UTF-8").strip().replace("  ", " ").replace("\t", " ").split(":")
+
+        string = bytes(input).split(b"\x00").pop(0).decode("ascii", errors="ignore")
+        partials = [_.strip() for _ in string.replace("  ", "").replace("\t", "").strip().split(":")]
+
+        # string = bytes(input).split(b"\x00").pop(0).decode("ascii", errors="ignore").encode("ascii", errors="ignore").decode()
+        # partials = string.replace("  ", "").replace("\t", "").split(":")
+
         return partials
 
     @classmethod
     async def run(cls):
-        cls.connection = await RCON.create(cls.ip, cls.port, cls.password, asyncio.get_event_loop(), multiple_packet=False)
         setup_logging()
+        try:
+            cls.connection: RCON = await RCON.create(
+                cls.ip,
+                cls.port,
+                cls.password,
+                asyncio.get_event_loop(),
+                multiple_packet=False
+            )
+        except ConnectionRefusedError:
+            log.critical(f"Could not connect to RCON: {cls.ip}:{cls.port}, connection was refused")
+            return
+
+        # Imported after a connection is established and env vars are loaded
+        from tracker.mordhau_events import RegisteredEvents
+
+        log.info("Connected to: " + (" - ".join([line for line in (await cls.connection("info")).split("\n")])))
         log.info(f"RCON connected to {cls.ip}:{cls.port}")
         await cls.connection("listen allon")
         async for event in cls.read(cls.connection.protocol._buffer):
             event: aiorcon.messages.RCONMessage
             log.debug(f"Received RCON emission: {event.body}")
-            partials = cls.format_mordhau_bytes(event.body)
-            log.debug(f"Received event: \"{':'.join(partials)}\"")
-            await EventListener.parse_event(Event(name=partials[0], content=",".join(partials[1:]).strip()))
+            # Split on NULL character, line terminator. This catches some scenarios in which RCON combines two message
+            # into one with a NULL character between them.
+            for event_line in event.body.split(b"\\x00"):
+                partials = cls.format_mordhau_bytes(event_line)
+                log.debug(f"Received event: \"{':'.join(partials)}\"")
+                await EventListener.parse_event(Event(name=partials[0], content=",".join(partials[1:])))
+
