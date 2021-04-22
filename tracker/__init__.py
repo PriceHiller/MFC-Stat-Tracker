@@ -11,7 +11,7 @@ import yaml
 from aiorcon import RCON
 from dotenv import load_dotenv
 
-from tracker.events import EventListener
+from tracker.events import parse
 from tracker.events import Event
 
 log = logging.getLogger(__name__)
@@ -130,5 +130,5 @@ class Base:
             for event_line in event.body.split(b"\\x00"):
                 partials = cls.format_mordhau_bytes(event_line)
                 log.debug(f"Received event: \"{':'.join(partials)}\"")
-                await EventListener.parse_event(Event(name=partials[0], content=",".join(partials[1:])))
+                await parse(Event(name=partials[0], content=",".join(partials[1:])))
 
