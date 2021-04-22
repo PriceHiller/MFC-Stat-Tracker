@@ -17,12 +17,12 @@ Example Listener Setup
 """
 
 from tracker.mordhau_events.Logging import LogEvents
-from tracker.mordhau_events.chat import ChatEvents
+from tracker.mordhau_events.commands.register import Registration
 
 
 class RegisteredEvents:
     log_events = LogEvents
-    chat_events = ChatEvents
+    registration = Registration
 
 
 __all__ = [

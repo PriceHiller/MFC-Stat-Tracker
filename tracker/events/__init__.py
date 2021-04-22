@@ -13,7 +13,7 @@ Example EventType
 >>>     PUNISHMENT: str = "Punishment"
 >>>     MATCH_STATE: str = "MatchState"
 >>>     SCORE_FEED: str = "Scorefeed"
->>>     KILL_FE: str = "Killfeed"
+>>>     KILL_FEED: str = "Killfeed"
 >>>
 >>>     def __str__(self):
 >>>         return self.value

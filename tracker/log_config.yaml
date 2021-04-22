@@ -3,6 +3,8 @@ disable_existing_loggers: false # Important, otherwise the discord.py logs will 
 formatters:
     standard:
         format: '[%(asctime)s][%(threadName)s][%(name)s.%(funcName)s:%(lineno)d][%(levelname)s] %(message)s'
+    raw_rcon:
+        format: '%(message)s'
 handlers:
     default_stream_handler:
         class: logging.StreamHandler
@@ -14,6 +16,12 @@ handlers:
         class: logging.handlers.RotatingFileHandler
         filename: rcon.log
         formatter: standard
+        level: DEBUG
+    raw_rcon_file_handler:
+        backupCount: 5
+        class: logging.handlers.RotatingFileHandler
+        filename: raw_rcon.log
+        formatter: raw_rcon
         level: DEBUG
     error_file_handler:
         backupCount: 5
@@ -28,5 +36,10 @@ loggers:
             - default_stream_handler
             - default_file_handler
             - error_file_handler
+        level: DEBUG
+        propagate: false
+    'raw_rcon': # Defined to capture RCON logs
+        handlers:
+            - raw_rcon_file_handler
         level: DEBUG
         propagate: false
