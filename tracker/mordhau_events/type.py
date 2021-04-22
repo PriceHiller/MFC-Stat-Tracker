@@ -1,7 +1,7 @@
 import enum
 
 
-class EventType(enum.Enum):
+class BaseMordhauEvent(enum.Enum):
     LOGIN: str = "Login"
     PUNISHMENT: str = "Punishment"
     MATCH_STATE: str = "MatchState"

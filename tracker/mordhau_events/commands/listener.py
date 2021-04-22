@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from tracker.events import Event
 from tracker.events import EventListener
 
-from tracker.mordhau_events.type import EventType
+from tracker.mordhau_events.type import BaseMordhauEvent
 
 log = logging.getLogger(__name__)
 
@@ -22,7 +22,12 @@ class CommandEventType(enum.Enum):
 
 
 class CommandListener(EventListener):
-    _listening_events = {}
+
+    def __init__(self):
+        super().__init__()
+
+
+command_listen = CommandListener().listen
 
 
 @dataclass
@@ -37,7 +42,7 @@ class ChatCommandHandler:
     prefix = os.getenv("CHAT_PREFIX", default="-")
 
     @staticmethod
-    @EventListener.listen(EventType.CHAT)
+    @EventListener.listen(BaseMordhauEvent.CHAT)
     async def base_chat_handler(event: Event):
         split_event = event.content.split(",")
         playfab_id = split_event[0]

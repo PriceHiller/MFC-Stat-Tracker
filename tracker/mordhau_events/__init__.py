@@ -3,12 +3,12 @@ Example Listener Setup
 ======================
 >>> # __init__.py
 >>> from tracker.events import EventListener
->>> from tracker.mordhau_events.type import EventType
+>>> from tracker.mordhau_events.type import BaseMordhauEvent
 >>>
 >>> class Test:
 >>>
 >>>     @staticmethod
->>>     @EventListener.listen(EventType.MATCH_STATE)
+>>>     @EventListener.listen(BaseMordhauEvent.MATCH_STATE)
 >>>     async def another_state(event):
 >>>         print("HIT")
 >>>

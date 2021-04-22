@@ -1,4 +1,4 @@
-from . import CommandListener
+from . import command_listen
 from . import CommandEventType
 from . import Event
 from . import ChatCommand
@@ -10,7 +10,7 @@ from tracker.apirequest import APIRequest
 class Registration:
 
     @staticmethod
-    @CommandListener.listen(CommandEventType.REGISTER)
+    @command_listen(CommandEventType.REGISTER)
     async def register(event: Event):
         command: ChatCommand = event.content
         registration_dict = {
