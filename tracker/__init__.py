@@ -11,8 +11,10 @@ import yaml
 from aiorcon import RCON
 from dotenv import load_dotenv
 
-from tracker.events import parse
-from tracker.events import Event
+from avents import parse
+from avents import Event
+
+from tracker.mordhau_events.type import BaseMordhauEvent
 
 log = logging.getLogger(__name__)
 
@@ -75,7 +77,9 @@ class Base:
         keep_alive_sent = time.time()
         while True:
             if buffer.responses:
-                yield buffer.pop()
+                item = buffer.pop()
+                print(item)
+                yield item
             if (time.time() - keep_alive_sent) > keep_alive_prod:
                 log.debug(f"Sending keep alive")
                 try:
@@ -88,9 +92,9 @@ class Base:
     @staticmethod
     def format_mordhau_bytes(input: bytes) -> list[str]:
         """Removes all non-ascii bytes from input and returns a split list of strings split on :"""
-
         string = bytes(input).split(b"\x00").pop(0).decode("ascii", errors="ignore")
         partials = [_.strip() for _ in string.replace("  ", "").replace("\t", "").strip().split(":")]
+        print(partials)
 
         # string = bytes(input).split(b"\x00").pop(0).decode("ascii", errors="ignore").encode("ascii", errors="ignore").decode()
         # partials = string.replace("  ", "").replace("\t", "").split(":")
@@ -110,7 +114,7 @@ class Base:
                 multiple_packet=False,
                 timeout=20
             )
-        except ConnectionRefusedError:
+        except ConnectionRefusedError as error:
             log.critical(f"Could not connect to RCON: \"{cls.ip}:{cls.port}\", connection was refused")
             return
         # Imported after a connection is established and env vars are loaded
@@ -119,7 +123,7 @@ class Base:
         log.info("Connected to: " + (" - ".join([line for line in (await cls.connection("info")).split("\n")])))
         log.info(f"RCON connected to {cls.ip}:{cls.port}")
         raw_rcon = logging.getLogger("raw_rcon")  # This defines raw rcon output without any logging formatting
-        print(await cls.connection("listen allon"))
+        log.info((await cls.connection("listen allon")).strip())
         async for event in cls.read(cls.connection.protocol._buffer):
             event: aiorcon.messages.RCONMessage
             raw_rcon.info(event.body)  # log the raw RCON output
@@ -130,5 +134,5 @@ class Base:
             for event_line in event.body.split(b"\\x00"):
                 partials = cls.format_mordhau_bytes(event_line)
                 log.debug(f"Received event: \"{':'.join(partials)}\"")
-                await parse(Event(name=partials[0], content=",".join(partials[1:])))
+                await parse(Event(name=partials[0], content=":".join(partials[1:])))
 

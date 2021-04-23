@@ -28,3 +28,5 @@ class RegisteredEvents:
 __all__ = [
     "RegisteredEvents"
 ]
+
+from avents import parse

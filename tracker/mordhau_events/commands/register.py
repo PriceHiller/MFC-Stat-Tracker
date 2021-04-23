@@ -1,18 +1,20 @@
-from . import command_listen
+import logging
+
 from . import CommandEventType
-from . import Event
-from . import ChatCommand
+from . import CommandListener
+from . import CommandEvent
 
 from tracker import Base
 from tracker.apirequest import APIRequest
 
 
+log = logging.getLogger(__name__)
+
 class Registration:
 
     @staticmethod
-    @command_listen(CommandEventType.REGISTER)
-    async def register(event: Event):
-        command: ChatCommand = event.content
+    @CommandListener.listen(CommandEventType.REGISTER)
+    async def register(command: CommandEvent):
         registration_dict = {
             "playfab_id": command.playfab_id,
             "player_name": command.player_name,
@@ -24,4 +26,8 @@ class Registration:
         elif response.status == 200:
             await Base.connection(f"say Registered {command.player_name} with id "
                                   f"{response.json['extra'][0]['player_id']}")
+        else:
+            await Base.connection(f"say Unable to register you! Response status: {response.status}. "
+                                  f"The API may be down.")
+            log.error(f"Unable to register: {registration_dict}, response status: {response.status}")
 

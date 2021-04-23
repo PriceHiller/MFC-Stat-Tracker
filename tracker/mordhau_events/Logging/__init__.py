@@ -1,7 +1,7 @@
 import logging
 
-from tracker.events import listen
-from tracker.events import Event
+from avents import listen
+from avents import Event
 from tracker.mordhau_events.type import BaseMordhauEvent
 
 
