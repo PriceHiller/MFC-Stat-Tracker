@@ -78,7 +78,6 @@ class Base:
         while True:
             if buffer.responses:
                 item = buffer.pop()
-                print(item)
                 yield item
             if (time.time() - keep_alive_sent) > keep_alive_prod:
                 log.debug(f"Sending keep alive")
@@ -94,7 +93,6 @@ class Base:
         """Removes all non-ascii bytes from input and returns a split list of strings split on :"""
         string = bytes(input).split(b"\x00").pop(0).decode("ascii", errors="ignore")
         partials = [_.strip() for _ in string.replace("  ", "").replace("\t", "").strip().split(":")]
-        print(partials)
 
         # string = bytes(input).split(b"\x00").pop(0).decode("ascii", errors="ignore").encode("ascii", errors="ignore").decode()
         # partials = string.replace("  ", "").replace("\t", "").split(":")
