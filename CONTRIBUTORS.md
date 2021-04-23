@@ -5,5 +5,5 @@
 
 # Testing Contributors
 
-- [ClinicallyLazy](mailto:clinicallylazy@gmail.com) -> Contributed testing servers for RCON debugging and 
-                                                       feature implementation
+- [ClinicallyLazy](mailto:clinicallylazy@gmail.com)
+    - Contributed testing servers for RCON debugging and feature implementation
