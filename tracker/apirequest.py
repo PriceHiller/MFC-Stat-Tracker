@@ -10,6 +10,13 @@ from aiohttp import ClientConnectionError
 log = logging.getLogger("__name__")
 
 
+class APIError(Exception):
+
+    def __init__(self, status_code: int, content):
+        self.status_code = status_code
+        self.content = content
+
+
 class APIRequest:
     api_url = os.getenv("API_URL", default=None)
     if not api_url:

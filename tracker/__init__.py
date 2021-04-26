@@ -9,12 +9,11 @@ from logging import config
 import aiorcon.messages
 import yaml
 from aiorcon import RCON
+from aiorcon.protocol import RCONProtocol
 from dotenv import load_dotenv
 
 from avents import parse
 from avents import Event
-
-from tracker.mordhau_events.type import BaseMordhauEvent
 
 log = logging.getLogger(__name__)
 
@@ -89,15 +88,15 @@ class Base:
             await asyncio.sleep(1)
 
     @staticmethod
-    def format_mordhau_bytes(input: bytes) -> list[str]:
+    def format_mordhau_bytes(input: bytes) -> str:
         """Removes all non-ascii bytes from input and returns a split list of strings split on :"""
         string = bytes(input).split(b"\x00").pop(0).decode("ascii", errors="ignore")
-        partials = [_.strip() for _ in string.replace("  ", "").replace("\t", "").strip().split(":")]
+        return string
 
         # string = bytes(input).split(b"\x00").pop(0).decode("ascii", errors="ignore").encode("ascii", errors="ignore").decode()
         # partials = string.replace("  ", "").replace("\t", "").split(":")
-
-        return partials
+        #
+        # return partials
 
     @classmethod
     async def run(cls):
@@ -110,13 +109,12 @@ class Base:
                 cls.password,
                 asyncio.get_event_loop(),
                 multiple_packet=False,
-                timeout=20
             )
         except ConnectionRefusedError as error:
             log.critical(f"Could not connect to RCON: \"{cls.ip}:{cls.port}\", connection was refused")
             return
         # Imported after a connection is established and env vars are loaded
-        from tracker.mordhau_events import RegisteredEvents
+        from tracker.mordhau_events.event_registration import RegisteredEvents
 
         log.info("Connected to: " + (" - ".join([line for line in (await cls.connection("info")).split("\n")])))
         log.info(f"RCON connected to {cls.ip}:{cls.port}")
@@ -129,8 +127,6 @@ class Base:
 
             # Split on NULL character, line terminator. This catches some scenarios in which RCON combines two message
             # into one with a NULL character between them.
-            for event_line in event.body.split(b"\\x00"):
-                partials = cls.format_mordhau_bytes(event_line)
-                log.debug(f"Received event: \"{':'.join(partials)}\"")
-                await parse(Event(name=partials[0], content=":".join(partials[1:])))
-
+            partials = cls.format_mordhau_bytes(event.body)
+            log.debug(f"Received event: \"{partials}\"")
+            await parse(Event(name="RCON", content=partials))

@@ -1,32 +1,27 @@
-"""
-Example Listener Setup
-======================
->>> # __init__.py
->>> from tracker.events import EventListener
->>> from tracker.mordhau_events.type import BaseMordhauEvent
->>>
->>> class Test:
->>>
->>>     @staticmethod
->>>     @EventListener.listen(BaseMordhauEvent.MATCH_STATE)
->>>     async def another_state(event):
->>>         print("HIT")
->>>
->>> # Then export to dunder-all in this __init__.py ...
->>> __all__ = ["Test"]
-"""
-
-from tracker.mordhau_events.Logging import LogEvents
-from tracker.mordhau_events.commands.register import Registration
+from avents import EventListener
+from avents import listen
+from avents import Event
+from avents import BaseEventType
 
 
-class RegisteredEvents:
-    log_events = LogEvents
-    registration = Registration
+class MordhauListener(EventListener):
+    ...
 
 
-__all__ = [
-    "RegisteredEvents"
-]
+class MordhauType(BaseEventType):
+    LOGIN: str = "Login:"
+    PUNISHMENT: str = "Punishment:"
+    MATCH_STATE: str = "MatchState:"
+    SCORE_FEED: str = "Scorefeed:"
+    KILL_FEED: str = "Killfeed:"
+    CHAT: str = "Chat:"
 
-from avents import parse
+
+@listen("RCON")
+async def mordhau_event_parser(event: Event):
+    for mord_type in MordhauType:
+        mord_type = str(mord_type)
+        if mord_type in event.content:
+            split_content = event.content.split(mord_type)
+            for rcon_content in split_content:
+                await MordhauListener.parse(Event(str(mord_type), rcon_content.strip()))
