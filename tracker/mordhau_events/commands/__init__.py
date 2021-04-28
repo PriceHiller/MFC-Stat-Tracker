@@ -18,6 +18,9 @@ class CommandEventType(BaseEventType):
     MATCH_START: str = "match start"
     MATCH_INFO: str = "match info"
     MATCH_RESTART: str = "match restart"
+    MATCH_NEXT: str = "match next"  # An event for switching to the next map
+    MATCH_PAUSE: str = "match pause"
+    MATCH_RESUME: str = "match resume"
 
 
 class CommandListener(MordhauListener):

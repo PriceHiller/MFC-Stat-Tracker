@@ -7,7 +7,7 @@ from urllib import parse
 from aiohttp import ClientSession
 from aiohttp import ClientConnectionError
 
-log = logging.getLogger("__name__")
+log = logging.getLogger(__name__)
 
 
 class APIError(Exception):

@@ -24,4 +24,5 @@ async def mordhau_event_parser(event: Event):
         if mord_type in event.content:
             split_content = event.content.split(mord_type)
             for rcon_content in split_content:
-                await MordhauListener.parse(Event(str(mord_type), rcon_content.strip()))
+                if rcon_content:
+                    await MordhauListener.parse(Event(str(mord_type), rcon_content.strip()))
