@@ -16,12 +16,32 @@ log = logging.getLogger(__name__)
 class Player:
     """A dataclass that loosely defines a player according to the MFC API"""
     playfab_id: str
-    api_id: [str, None]
+    player_id: [str, None]
+    team_id: [str, None]
+    round_id: str
+    team_number: int
     name: str
     score: int
     kills: int
     assists: int
     deaths: int
+
+    async def get_api_id(self):
+        api_player = await APIRequest.get(f"/player/playfab-id?playfab_id={self.playfab_id}")
+
+        if api_player.status != 200:
+            # This registers a player with the API in the scenario we were unable to get them
+            register_event = CommandEvent("register", None, self.playfab_id, self.name)
+            await CommandListener.parse(register_event)
+        api_player = await APIRequest.get(f"/player/playfab-id?playfab_id={self.playfab_id}")
+        if api_player.status != 200:
+            # In the scenario we were unable to find them after registration we log the event and notify the match
+            await Base.connection(f"Say something has gone wrong, was unable to find player {self.name}, "
+                                  f"but they should already be registered!")
+            log.error(f"Was unable to find player \"{self.name}\", playfab: \"{self.playfab_id}\" when they "
+                      f"should've already been registered")
+            return
+        self.player_id = api_player.json["id"]
 
 
 class Team:
@@ -29,30 +49,6 @@ class Team:
     def __init__(self, team_id, name):
         self.id = team_id
         self.name = name
-        self.players: dict[str, Player] = {}
-
-    async def add_player(self, player: Player):
-        """This adds a player to the team and registers them with the API if they are not already tracked."""
-        if self.players.get(player.playfab_id):
-            return
-
-        api_player = await APIRequest.get(f"/player/playfab-id?playfab_id={player.playfab_id}")
-
-        if api_player.status != 200:
-            # This registers a player with the API in the scenario we were unable to get them
-            register_event = CommandEvent("register", None, player.playfab_id, player.name)
-            await CommandListener.parse(register_event)
-        api_player = await APIRequest.get(f"/player/playfab-id?playfab_id={player.playfab_id}")
-        if api_player.status != 200:
-            # In the scenario we were unable to find them after registration we log the event and notify the match
-            await Base.connection(f"Say something has gone wrong, was unable to find player {player.name}, "
-                                  f"but they should already be registered!")
-            log.error(f"Was unable to find player \"{player.name}\", playfab: \"{player.playfab_id}\" when they "
-                      f"should've already been registered")
-            return
-        player_json = api_player.json
-        player.api_id = player_json["id"]
-        self.players[player.playfab_id] = player
 
     @staticmethod
     async def get_team_by_name(team_name):
@@ -65,10 +61,12 @@ class Match:
     def __init__(self, red_team: Team, blue_team: Team):
         self.team1 = red_team
         self.team2 = blue_team
+        self.team1_score: int = 0
+        self.team2_score: int = 0
         self.api_data = None
         self.id = None
 
-    async def __aenter__(self):
+    async def ainit(self):
         new_match = await APIRequest.post(
             "/match/create-match",
             data={
@@ -90,8 +88,14 @@ class Set:
         self.api_data = None
         self.id = None
 
-    async def __aenter__(self, map: str):
-        new_set = await APIRequest.post("/set/create")
+    async def ainit(self):
+        new_set = await APIRequest.post(
+            "/set/create-set",
+            data={
+                "map": self.map,
+                "match_id": self.match.id
+            }
+        )
         if new_set.status != 200:
             log.error(f"Unable to create a new set, status: \"{new_set.status}\", content: \"{new_set.json}\"")
             raise APIError(new_set.status, new_set.json)
@@ -109,10 +113,17 @@ class Round:
         self.api_data = None
         self.id = None
 
-    async def __aenter__(self):
-        new_round = await APIRequest.post(f"/round/create-round")
+    async def create(self, team1_win: bool, team2_win: bool):
+        new_round = await APIRequest.post(
+            f"/round/create-round",
+            data={
+                "set_id": self.set.id,
+                "team1_win": team1_win,
+                "team2_win": team2_win
+            }
+        )
         if new_round.status != 200:
             log.error(f"Unable to create a new round, status: \"{new_round.status}\", content: \"{new_round.json}\"")
             raise APIError(new_round.status, new_round.json)
         self.api_data = new_round.json
-        self.id = self.api_data["extra"][0]["set_id"]
+        self.id = self.api_data["extra"][0]["round_id"]

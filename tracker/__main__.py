@@ -25,7 +25,10 @@ def main(*args):
 
     if "--debug" in lower_args or "-d" in lower_args:
         loop.set_debug(True)
+        logging.getLogger('asyncio').setLevel(logging.DEBUG)
         print("Enabled debug for the async loop")
+    else:
+        logging.getLogger('asyncio').setLevel(logging.WARNING)
 
     try:
         loop.run_until_complete(Base.run())

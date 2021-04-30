@@ -16,11 +16,10 @@ class CommandEventType(BaseEventType):
     REGISTER: str = "register"
     MATCH_SETUP: str = "match setup"
     MATCH_START: str = "match start"
-    MATCH_INFO: str = "match info"
-    MATCH_RESTART: str = "match restart"
     MATCH_NEXT: str = "match next"  # An event for switching to the next map
     MATCH_PAUSE: str = "match pause"
     MATCH_RESUME: str = "match resume"
+    MATCH_END: str = "match end"
 
 
 class CommandListener(MordhauListener):

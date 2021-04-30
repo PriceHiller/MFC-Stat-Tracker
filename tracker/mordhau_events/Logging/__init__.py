@@ -15,7 +15,7 @@ class LogEvents:
     @staticmethod
     @MordhauListener.listen(*[mord_type for mord_type in MordhauType])
     async def log_event(event: Event):
-        log.info(f"{event.name} \"{event.content}\"")
+        log.info(f"\"{event.name.strip()}\": \"{event.content.strip()}\"")
 
 __all__ = [
     "LogEvents"

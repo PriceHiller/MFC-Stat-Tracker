@@ -34,7 +34,6 @@ def setup_logging() -> None:
 
         with open(log_config_path) as f:
             log_config = yaml.safe_load(f)
-        logging.getLogger('asyncio').setLevel(logging.WARNING)
     except FileNotFoundError as error:
         print(f"Could not find your log config at: {str(error).split(' ')[-1]}")
         return
@@ -65,6 +64,10 @@ class Base:
         connection = RconConnection(ip, port=port, password=password,
                                     single_packet_mode=True)
         log.info(f"Connected to RCON: \"{ip}:{port}\"")
+    except ConnectionRefusedError:
+        log.error(f"Connection was refused to \"{ip}:{port}\", verify that your connection info is correct and that "
+                  f"the server is up.")
+        sys.exit(1)
     except Exception as error:
         log.exception("Could not connect to the server")
         sys.exit(1)
@@ -88,6 +91,7 @@ class Base:
     @classmethod
     async def run(cls):
         setup_logging()
+        print((await rcon_command("info")).casefold().split("map:"))
         log.info(f"RCON connected to {cls.ip}:{cls.port}")
         log.info("RCON info: " +
                  " - ".join("".join(cls.format_mordhau_bytes(cls.connection.exec_command("info"))).split("\n"))
@@ -109,11 +113,12 @@ class Base:
             # into one with a NULL character between them.
             for split_event in event.split(rb"\x00"):
                 partials = cls.format_mordhau_bytes(split_event)
-                log.debug(f"Received event: \"{partials}\"")
+                log.debug(f"Received event: \"{partials.strip()}\"")
                 await parse(Event(name="RCON", content=partials))
 
     @classmethod
     async def rcon_command(cls, command: str) -> str:
+        log.debug(f"Issued RCON command: \"{command.strip()}\"")
         process = await asyncio.create_subprocess_shell(
             f"RCON --Server {cls.ip} --Port {cls.port} --Password {cls.password} -c \"{command}\"",
             shell=True,
@@ -121,7 +126,9 @@ class Base:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        return (await process.communicate())[0].decode()
+        data = (await process.communicate())[0].decode()
+        log.debug(f"Server responded to RCON command \"{command}\" with \"{data.strip()}\"")
+        return data
 
 
 rcon_command = Base.rcon_command
