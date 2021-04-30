@@ -48,7 +48,7 @@ class APIRequest:
             return cls.Response({}, 418)
         async with ClientSession(headers=cls.headers) as session:
             try:
-                log.debug(f"GET request issued to {full_url}")
+                log.debug(f"GET request issued to \"{full_url}\"")
                 async with session.get(full_url, ssl=False) as get_session:
                     json_dict = await get_session.json() or {}
                     return cls.Response(json_dict, get_session.status)
@@ -67,7 +67,7 @@ class APIRequest:
             return cls.Response({}, 400)
         async with ClientSession(headers=cls.headers) as session:
             try:
-                log.debug(f"POST request issued to {full_url}")
+                log.debug(f"POST request issued to \"{full_url}\" with data \"{data}\"")
                 async with session.post(full_url, json=data, ssl=False) as post_session:
                     json_dict = await post_session.json() or {}
                     return cls.Response(json_dict, post_session.status)

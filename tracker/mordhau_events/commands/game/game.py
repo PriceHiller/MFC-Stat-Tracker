@@ -40,14 +40,12 @@ class Game:
     else:
         valid_maps = valid_maps.split(",")
 
-    match = None
-    sets = []
-    current_set = None
-    rounds = []
-    current_round = None
-    map_queue = []
-    recording = False
-    players: dict = {}
+    match: [Match, None] = None
+    current_set: [Set, None] = None
+    current_round: [Round, None] = None
+    map_queue: list[str] = []
+    recording: bool = False
+    players: dict[str, Player] = {}
 
     @classmethod
     async def check_admin_perm(cls, playfab_id) -> bool:
@@ -158,7 +156,7 @@ class Game:
             return
         if Game.match:
             Game.recording = False
-            await rcon_command(f"Paused the match.")
+            await rcon_command(f"say Paused the match.")
         else:
             await rcon_command(f"say A match is not currently ongoing.")
 
@@ -170,7 +168,7 @@ class Game:
             return
         if Game.match:
             Game.recording = True
-            await rcon_command(f"Resumed the match.")
+            await rcon_command(f"say Resumed the match.")
         else:
             await rcon_command(f"say A match is not currently ongoing.")
 
@@ -191,13 +189,8 @@ class Game:
             next_map = cls.map_queue.pop(0)
             new_set = Set(cls.match, next_map)
             await new_set.ainit()
-            if cls.current_set:
-                cls.sets.append(cls.current_set)
             cls.current_set = new_set
             new_round = Round(new_set)
-            await new_round.create(True, False)
-            if cls.current_round:
-                cls.rounds.append(cls.current_round)
             cls.current_round = new_round
             await rcon_command(f"say Moving to next map: `{next_map}`")
             await asyncio.sleep(3)
@@ -228,13 +221,14 @@ class Game:
                 log.error(f"Could not calculate elo, response status: {response.status}")
                 cls.recording = False
                 return
+            match_id = cls.match.id
             cls.match = None
             cls.map_queue = []
-            cls.sets = []
-            cls.rounds = []
             cls.current_set = None
             cls.current_round = None
             cls.recording = False
+            await rcon_command(f"say Match ended, id: {match_id}")
+            return
 
     @staticmethod
     @MordhauListener.listen(MordhauType.SCORE_FEED)
@@ -243,14 +237,8 @@ class Game:
 
     @classmethod
     async def process_round_end(cls, event: CommandEvent):
-        current_map = (await rcon_command("info")).casefold().strip().split("map: ")[-1]
-        if current_map != cls.current_set.map.strip().casefold():
-            await rcon_command(f"say Attempted to gather data for the last round, but it was not on the correct map. "
-                               f"The expected map that data is being gathered for is {cls.current_set.map}!")
-            return
         if not cls.recording:
             return
-        log.info(f"Round End processing")
         search = re.findall(".\d+", event.content.split(":")[-1].strip())
         try:
             team_num = int(search[1].strip())
@@ -264,6 +252,12 @@ class Game:
             return
         if team_initial_score == team_new_score:
             return
+        current_map = (await rcon_command("info")).casefold().strip().split("map: ")[-1]
+        if current_map not in cls.current_set.map.strip().casefold():
+            await rcon_command(f"say Attempted to gather data for the last round, but it was not on the correct map. "
+                               f"The expected map that data is being gathered for is {cls.current_set.map}!")
+            return
+        log.info(f"Round End processing")
         scoreboard = (await rcon_command("scoreboard")).split("\n")
         players = []
         for scoreboard_player in scoreboard:
@@ -284,12 +278,16 @@ class Game:
 
             if team_num == 0:
                 team_id = cls.match.team1.id
+                cls.match.team1_score += 1
+                await cls.current_round.create(True, False)
             else:
                 team_id = cls.match.team2.id
+                cls.match.team2_score += 1
+                await cls.current_round.create(False, True)
 
             player = Player(playfab, None, team_id, cls.current_round.id, team_num, name, score, kills, assists, deaths)
             await player.get_api_id()
-            registered_player = cls.players.get(player.playfab_id, default=None)
+            registered_player = cls.players.get(player.playfab_id, None)
             if not registered_player:
                 cls.players[player.playfab_id] = player
             else:
@@ -301,8 +299,10 @@ class Game:
 
         api_round_players = {"round_players": [vars(player) for player in players]}
         response = await APIRequest.post("/round/create-round-players", data=api_round_players)
+
         if response.status == 200:
-            await rcon_command(f"Saved data for the last round, id: {response.json['extra'][0]['round_players_ids']}")
+            await rcon_command(f"say Saved data for the last round, id: {cls.current_round.id}")
+            cls.current_round = Round(cls.current_set)
         else:
             await rcon_command(f"Unable to save data for the last round, status code: {response.status}")
             log.error(f"Unable to save data for a ended tracked round, data sent: \"{api_round_players}\", "
