@@ -61,6 +61,15 @@ class Game:
 
     @classmethod
     async def match_setup(cls, command: CommandEvent):
+        """
+        Setups the match with relevant match data:
+
+        An example string that defines a valid setup is:
+            -match setup 20Racecar, Big Cogs, skm_moshpit, skm_contraband, skm_steedie_contraband, ...
+
+        Where `20Racecar` is a team, `Big Cogs` is a team, and all that follows valid Mordhau maps defined in your
+        .env by a comma delimited value
+        """
         if not await cls.check_admin_perm(command.playfab_id):
             await rcon_command(f"say You are not permitted to run this command")
             return
@@ -151,6 +160,9 @@ class Game:
     @staticmethod
     @CommandListener.listen(CommandEventType.MATCH_PAUSE)
     async def pause_match(event: CommandEvent):
+        """
+        Pauses the match by ignoring all further output from RCON until it is resumed via Game.resume_match
+        """
         if not await Game.check_admin_perm(event.playfab_id):
             await rcon_command(f"say You are not permitted to run this command")
             return
@@ -163,6 +175,9 @@ class Game:
     @staticmethod
     @CommandListener.listen(CommandEventType.MATCH_RESUME)
     async def resume_match(event: CommandEvent):
+        """
+        If the match is paused (Game.recording = False) then resume the match by listening to RCON output again.
+        """
         if not await Game.check_admin_perm(event.playfab_id):
             await rcon_command(f"say You are not permitted to run this command")
             return
@@ -175,6 +190,10 @@ class Game:
     @staticmethod
     @CommandListener.listen(CommandEventType.MATCH_NEXT)
     async def match_next_command(event: CommandEvent):
+        """
+        Change the map to the next level that is within the Game.map_queue list via the Game.next_set function
+        """
+
         if not await Game.check_admin_perm(event.playfab_id):
             await rcon_command(f"say You are not permitted to run this command")
             return
@@ -185,6 +204,9 @@ class Game:
 
     @classmethod
     async def next_set(cls):
+        """
+        Change the map to the next map if there is a map in the Game.map_queue, otherwise end the match.
+        """
         if len(cls.map_queue) > 0:
             next_map = cls.map_queue.pop(0)
             new_set = Set(cls.match, next_map)
@@ -192,7 +214,7 @@ class Game:
             cls.current_set = new_set
             new_round = Round(new_set)
             cls.current_round = new_round
-            await rcon_command(f"say Moving to next map: `{next_map}`")
+            await rcon_command(f"say Moving to next map: {next_map}")
             await asyncio.sleep(3)
             await rcon_command(f"changelevel {next_map}")
             cls.recording = True
@@ -206,6 +228,9 @@ class Game:
     @staticmethod
     @CommandListener.listen(CommandEventType.MATCH_END)
     async def match_end_command(event: CommandEvent):
+        """
+        Ends a match if the user is in the admins .env arg
+        """
         if not await Game.check_admin_perm(event.playfab_id):
             await rcon_command(f"say You are not permitted to run this command")
             return
@@ -213,6 +238,9 @@ class Game:
 
     @classmethod
     async def end_match(cls):
+        """
+        End the match and calculate the match's ELO result on the API
+        """
         if cls.match:
             response = await APIRequest.post(f"/match/calculate-match-elo?match_id={cls.match.id}")
             if response.status != 200:
@@ -237,11 +265,22 @@ class Game:
 
     @classmethod
     async def process_round_end(cls, event: CommandEvent):
+        """
+        Process a round end event from RCON, specifically looking for a team score increase. The full event looks like:
+
+        ```
+        Event(name='Scorefeed:', content="2021.05.01-02.25.29: Team 0's is now 7.0 points from 6.0 points")
+        ```
+
+        where we are parsing the content after the timestamp colon.
+
+        This is done to gather new scores for each player after a round has concluded.
+        """
         if not cls.recording:
             return
         search = re.findall(".\d+", event.content.split(":")[-1].strip())
         try:
-            team_num = int(search[1].strip())
+            team_num = int(search[0].strip())
             if team_num < 0:
                 return
             team_initial_score = int(search[1].strip())
@@ -250,23 +289,35 @@ class Game:
             return
         except ValueError:
             return
-        if team_initial_score == team_new_score:
+        if team_initial_score == team_new_score:  # Ensure that the score increased, otherwise a round didn't end
+            log.debug(f"Ignored round end, scores were the same, initial score: \"{team_initial_score}\","
+                      f" new score: \"{team_new_score}\"")
             return
         current_map = (await rcon_command("info")).casefold().strip().split("map: ")[-1]
-        if current_map not in cls.current_set.map.strip().casefold():
+        if current_map.replace(" ", "_") not in cls.current_set.map.strip().casefold():
             await rcon_command(f"say Attempted to gather data for the last round, but it was not on the correct map. "
                                f"The expected map that data is being gathered for is {cls.current_set.map}!")
             return
-        log.info(f"Round End processing")
-        scoreboard = (await rcon_command("scoreboard")).split("\n")
+        log.info(f"Round End processing for data: {event}, parsed into {[_.strip() for _ in search]}")
+        if team_num == 0:  # Figure out which team one and make the correct associated round winner on the API
+            cls.match.team1_score += 1
+            await cls.current_round.create(True, False)
+        elif team_num == 1:
+            cls.match.team2_score += 1
+            await cls.current_round.create(False, True)
+        else:
+            return
+
+        scoreboard = (await rcon_command("scoreboard")).split("\n")  # Finds the new scoreboard of players
         players = []
-        for scoreboard_player in scoreboard:
+        log.debug(f"Round end processing of the following players: {[player.strip() for player in scoreboard]}")
+        for scoreboard_player in scoreboard:  # Begin parsing down these players so we can get their scores
             if not scoreboard_player.strip():
                 continue
             player_split = scoreboard_player.split(", ")
             team_num = int(player_split[2])
 
-            if team_num < 0:
+            if team_num < 0:  # If their team number is less than 0 then they are a spectator
                 continue
 
             playfab = player_split[0]
@@ -278,27 +329,27 @@ class Game:
 
             if team_num == 0:
                 team_id = cls.match.team1.id
-                cls.match.team1_score += 1
-                await cls.current_round.create(True, False)
             else:
                 team_id = cls.match.team2.id
-                cls.match.team2_score += 1
-                await cls.current_round.create(False, True)
 
             player = Player(playfab, None, team_id, cls.current_round.id, team_num, name, score, kills, assists, deaths)
-            await player.get_api_id()
+            await player.get_api_id()  # Find their API id and if not register them
             registered_player = cls.players.get(player.playfab_id, None)
             if not registered_player:
                 cls.players[player.playfab_id] = player
             else:
+                cls.players[player.playfab_id] = player  # Copy the new scoreboard data before making modifications
+
+                # Being modifying data, this is to ensure we only capture how many kills, deaths, etc. they got
+                # THIS round. If we don't make a modification then we capture all of their SET data cumulatively
                 player.kills -= registered_player.kills
                 player.score -= registered_player.score
                 player.assists -= registered_player.assists
                 player.deaths -= registered_player.deaths
             players.append(player)
 
-        api_round_players = {"round_players": [vars(player) for player in players]}
-        response = await APIRequest.post("/round/create-round-players", data=api_round_players)
+        api_round_players = {"round_players": [vars(player) for player in players]}  # Generates a dict for JSON parsing
+        response = await APIRequest.post("/round/create-round-players", data=api_round_players)  # Save the data
 
         if response.status == 200:
             await rcon_command(f"say Saved data for the last round, id: {cls.current_round.id}")
