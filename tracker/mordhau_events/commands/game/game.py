@@ -55,6 +55,32 @@ class Game:
         return False
 
     @staticmethod
+    @CommandListener.listen(CommandEventType.MATCH_HELP)
+    async def match_help(event: CommandEvent):
+        """
+        Outputs a help command for match arguments, each help string can only be a MAX of 300 characters.
+        """
+
+        help_strs = [
+            """
+            Match Commands:
+                match help: Shows this message
+                match setup: Setups the match, example use:
+                    match setup team one, team two, map, map, map
+                match start: Begins a match once setup
+            """,  # 269 characters
+            """
+            Match Commands continued:
+                match next: Goes to the next level and saves data for that set
+                match pause: Stops gathering data
+                match resume: Being gathering data again
+            """  # 237 characters
+        ]
+
+        for help_str in help_strs:
+            await rcon_command(f"say {help_str}")
+
+    @staticmethod
     @CommandListener.listen(CommandEventType.MATCH_SETUP)
     async def _match_setup_hook(event: CommandEvent):
         await Game.match_setup(event)

@@ -20,6 +20,7 @@ class CommandEventType(BaseEventType):
     MATCH_PAUSE: str = "match pause"
     MATCH_RESUME: str = "match resume"
     MATCH_END: str = "match end"
+    MATCH_HELP: str = "match help"
 
 
 class CommandListener(MordhauListener):

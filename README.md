@@ -42,6 +42,11 @@ Clone the repository and then do the following
    python -m tracker
    ```
 
+## In Game Usage
+
+Type `match help` for a list of match commands, otherwise the `register` command can be used to register the invoker
+with the API.
+
 ## Configuration
 All config values are passed via environment variables. See [Environment Variables](#Environment Variables)
 
