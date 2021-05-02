@@ -1,5 +1,5 @@
 version: 1
-disable_existing_loggers: false # Important, otherwise the discord.py logs will not be logged. Keep this as false
+disable_existing_loggers: false # Important, otherwise some lib logs may be dropped
 formatters:
     standard:
         format: '[%(asctime)s][%(threadName)s][%(name)s.%(funcName)s:%(lineno)d][%(levelname)s] %(message)s'

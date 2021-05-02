@@ -27,7 +27,7 @@ else:
 
 def setup_logging() -> None:
     try:
-        if log_config_path := os.getenv("log_config_path", default=None):
+        if log_config_path := os.getenv("LOG_CONFIG_PATH", default=None):
             log_config_path = Path(log_config_path)
         else:
             log_config_path = root_path / "log_config.yaml"
