@@ -91,7 +91,6 @@ class Base:
     @classmethod
     async def run(cls):
         setup_logging()
-        print((await rcon_command("info")).casefold().split("map:"))
         log.info(f"RCON connected to {cls.ip}:{cls.port}")
         log.info("RCON info: " +
                  " - ".join("".join(cls.format_mordhau_bytes(cls.connection.exec_command("info"))).split("\n"))
