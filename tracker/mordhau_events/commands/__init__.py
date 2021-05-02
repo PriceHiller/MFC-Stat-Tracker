@@ -35,6 +35,7 @@ class CommandEvent(Event):
 
 class ChatCommandHandler:
     prefix = os.getenv("CHAT_PREFIX", default="-")
+    log.info(f"Chat prefix is set to \"{prefix}\"")
 
     @staticmethod
     @MordhauListener.listen(MordhauType.CHAT)

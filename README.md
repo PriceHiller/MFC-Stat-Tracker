@@ -36,6 +36,7 @@ Clone the repository and then do the following
     ```bash
     python3 -m venv venv
     source venv/bin/activate
+    python -m pip install -r requirements.txt
     ```
 4. Run the program:
    ```bash
