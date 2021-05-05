@@ -6,6 +6,7 @@ import asyncio
 from pathlib import Path
 from logging import config
 
+import aiohttp.client_exceptions
 import yaml
 from srcds.rcon import RconConnection
 from dotenv import load_dotenv
@@ -104,6 +105,19 @@ class Base:
     @classmethod
     async def run(cls, *args):
         setup_logging()
+
+        from tracker.apirequest import APIRequest
+
+        auth_fail_msg = f"Could not authenticate with the API located at \"{APIRequest.api_url}\""
+        try:
+            authenticated = await APIRequest.post("/user/verify")
+
+            if authenticated.status != 200:
+                log.error(auth_fail_msg)
+                return
+        except aiohttp.client_exceptions.ContentTypeError:
+            log.error(auth_fail_msg)
+            return
         log.info(f"RCON connected to {cls.ip}:{cls.port}")
         log.info("RCON info: " +
                  " - ".join("".join(cls.format_mordhau_bytes(cls.connection.exec_command("info"))).split("\n"))
