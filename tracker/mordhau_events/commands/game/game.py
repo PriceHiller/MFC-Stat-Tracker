@@ -240,6 +240,7 @@ class Game:
             cls.current_set = new_set
             new_round = Round(new_set)
             cls.current_round = new_round
+            cls.players = {}
             await rcon_command(f"say Moving to next map: {next_map}")
             await asyncio.sleep(3)
             await rcon_command(f"changelevel {next_map}")
