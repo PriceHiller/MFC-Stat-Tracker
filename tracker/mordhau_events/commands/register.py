@@ -25,8 +25,8 @@ class Registration:
             await rcon_command(f"say Attempted to register {command.player_name}, but they were already registered.")
         elif response.status == 200:
             await rcon_command(f"say Registered {command.player_name} with id "
-                                  f"{response.json['extra'][0]['player_id']}")
+                               f"{response.json['extra'][0]['player_id']}")
         else:
             await rcon_command(f"say Unable to register {command.player_name}! Response status: {response.status}. "
-                                  f"The API may be down.")
+                               f"The API may be down.")
             log.error(f"Unable to register: {registration_dict}, response status: {response.status}")

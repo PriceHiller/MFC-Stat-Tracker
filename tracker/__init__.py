@@ -73,9 +73,22 @@ class Base:
         sys.exit(1)
 
     @classmethod
-    async def read(cls):
-        while True:
-            yield cls.connection.read_response().body
+    async def read(cls, read_log=False):
+        if read_log:
+            raw_rcon_log = root_path.parent / "raw_rcon.log"
+            log.info(f"Reading the log data in \"{str(raw_rcon_log)}\"")
+            await asyncio.sleep(3)  # Sleep so we have time to read the output of the log message above
+            if not raw_rcon_log.exists():
+                log.error(
+                    f"Expected the log \"{str(raw_rcon_log)}\" but it did not exist! The `read log` flag requires "
+                    f"that file to read data from!")
+                return
+            with open(raw_rcon_log, "r") as f:
+                for line in f.readlines():
+                    yield line[1:-1].encode()
+        else:
+            while True:
+                yield cls.connection.read_response().body
 
     @staticmethod
     def format_mordhau_bytes(input: bytes) -> str:
@@ -89,7 +102,7 @@ class Base:
         # return partials
 
     @classmethod
-    async def run(cls):
+    async def run(cls, *args):
         setup_logging()
         log.info(f"RCON connected to {cls.ip}:{cls.port}")
         log.info("RCON info: " +
@@ -104,7 +117,11 @@ class Base:
 
         raw_rcon = logging.getLogger("raw_rcon")
 
-        async for event in cls.read():
+        if "--read-log" in args or "-r" in args:
+            read_log = True
+        else:
+            read_log = False
+        async for event in cls.read(read_log=read_log):
             log.debug(f"Received RCON emission: {event}")
             raw_rcon.info(event)
 

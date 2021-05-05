@@ -31,7 +31,7 @@ def main(*args):
         logging.getLogger('asyncio').setLevel(logging.WARNING)
 
     try:
-        loop.run_until_complete(Base.run())
+        loop.run_until_complete(Base.run(*args[-1]))
     except KeyboardInterrupt:
         log.info("Exiting...")
 
