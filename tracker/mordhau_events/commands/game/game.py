@@ -1,3 +1,4 @@
+import copy
 import logging
 import os
 import asyncio
@@ -241,7 +242,7 @@ class Game:
             new_round = Round(new_set)
             cls.current_round = new_round
             cls.players = {}
-            await rcon_command(f"say Moving to next map: {next_map}")
+            await rcon_command(f"say API EVENT: Moving to next map {next_map}")
             await asyncio.sleep(3)
             await rcon_command(f"changelevel {next_map}")
             cls.recording = True
@@ -282,7 +283,7 @@ class Game:
             cls.current_set = None
             cls.current_round = None
             cls.recording = False
-            await rcon_command(f"say Match ended, id: {match_id}")
+            await rcon_command(f"say API EVENT: Match ended")
             return
 
     @staticmethod
@@ -361,13 +362,16 @@ class Game:
 
             player = Player(playfab, None, team_id, cls.current_round.id, team_num, name, score, kills, assists, deaths)
             await player.get_api_id()  # Find their API id and if not register them
-            registered_player = cls.players.get(player.playfab_id, None)
+            registered_player = cls.players.pop(player.playfab_id, None)
             if not registered_player:
                 cls.players[player.playfab_id] = player
             else:
-                cls.players[player.playfab_id] = player  # Copy the new scoreboard data before making modifications
+                log.debug(f"Found {player.name} in registered players, registered data: {str(registered_player)}, "
+                          f"new data: {str(player)}")
+                cls.players[player.playfab_id] = copy.deepcopy(
+                    player)  # Copy the new scoreboard data before making modifications
 
-                # Being modifying data, this is to ensure we only capture how many kills, deaths, etc. they got
+                # Modifying data, this is to ensure we only capture how many kills, deaths, etc. they got
                 # THIS round. If we don't make a modification then we capture all of their SET data cumulatively
                 player.kills -= registered_player.kills
                 player.score -= registered_player.score
@@ -375,13 +379,14 @@ class Game:
                 player.deaths -= registered_player.deaths
             players.append(player)
 
-        api_round_players = {"round_players": [vars(player) for player in players]}  # Generates a dict for JSON parsing
-        response = await APIRequest.post("/round/create-round-players", data=api_round_players)  # Save the data
+            api_round_players = {
+                "round_players": [vars(player) for player in players]}  # Generates a dict for JSON parsing
+            response = await APIRequest.post("/round/create-round-players", data=api_round_players)  # Save the data
 
-        if response.status == 200:
-            await rcon_command(f"say Saved data for the last round, id: {cls.current_round.id}")
-            cls.current_round = Round(cls.current_set)
-        else:
-            await rcon_command(f"Unable to save data for the last round, status code: {response.status}")
-            log.error(f"Unable to save data for a ended tracked round, data sent: \"{api_round_players}\", "
-                      f"received response: \"{response.status}\", \"{response.json}\"")
+            if response.status == 200:
+                await rcon_command(f"say API EVENT: Saved data for the last round")
+                cls.current_round = Round(cls.current_set)
+            else:
+                await rcon_command(f"Unable to save data for the last round, status code: {response.status}")
+                log.error(f"Unable to save data for a ended tracked round, data sent: \"{api_round_players}\", "
+                          f"received response: \"{response.status}\", \"{response.json}\"")

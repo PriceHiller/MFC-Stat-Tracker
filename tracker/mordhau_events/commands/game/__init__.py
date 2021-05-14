@@ -12,7 +12,7 @@ from tracker.mordhau_events.commands import CommandEvent
 log = logging.getLogger(__name__)
 
 
-@dataclass
+@dataclass(frozen=False)
 class Player:
     """A dataclass that loosely defines a player according to the MFC API"""
     playfab_id: str
