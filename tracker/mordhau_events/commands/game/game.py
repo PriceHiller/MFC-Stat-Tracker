@@ -101,9 +101,6 @@ class Game:
             await rcon_command(f"say You are not permitted to run this command")
             return
 
-        if Game.match:
-            await Game.end_match()
-
         example_message = f"say \nAn example would be:\n" \
                           f"- match start Vanquish, Racecar, skm_moshpit, skm_contraband, skm_antheum,..."
 
@@ -145,7 +142,7 @@ class Game:
             return
 
         if team1.status != 200:
-            await rcon_command(f"say Unable to retrive data from the API for {split_args[0]}")
+            await rcon_command(f"say Unable to retrieve data from the API for {split_args[0]}")
             return
 
         team2 = await Team.get_team_by_name(team_name=split_args[1])
@@ -277,13 +274,12 @@ class Game:
                 log.error(f"Could not calculate elo, response status: {response.status}")
                 cls.recording = False
                 return
-            match_id = cls.match.id
             cls.match = None
             cls.map_queue = []
             cls.current_set = None
             cls.current_round = None
             cls.recording = False
-            await rcon_command(f"say API EVENT: Match ended")
+            await rcon_command(f"say Match ended")
             return
 
     @staticmethod
@@ -369,7 +365,8 @@ class Game:
                 log.debug(f"Found {player.name} in registered players, registered data: {str(registered_player)}, "
                           f"new data: {str(player)}")
                 cls.players[player.playfab_id] = copy.deepcopy(
-                    player)  # Copy the new scoreboard data before making modifications
+                    player
+                )  # Copy the new scoreboard data before making modifications
 
                 # Modifying data, this is to ensure we only capture how many kills, deaths, etc. they got
                 # THIS round. If we don't make a modification then we capture all of their SET data cumulatively
@@ -379,14 +376,14 @@ class Game:
                 player.deaths -= registered_player.deaths
             players.append(player)
 
-            api_round_players = {
-                "round_players": [vars(player) for player in players]}  # Generates a dict for JSON parsing
-            response = await APIRequest.post("/round/create-round-players", data=api_round_players)  # Save the data
+        api_round_players = {
+            "round_players": [vars(player) for player in players]}  # Generates a dict for JSON parsing
+        response = await APIRequest.post("/round/create-round-players", data=api_round_players)  # Save the data
 
-            if response.status == 200:
-                await rcon_command(f"say API EVENT: Saved data for the last round")
-                cls.current_round = Round(cls.current_set)
-            else:
-                await rcon_command(f"Unable to save data for the last round, status code: {response.status}")
-                log.error(f"Unable to save data for a ended tracked round, data sent: \"{api_round_players}\", "
-                          f"received response: \"{response.status}\", \"{response.json}\"")
+        if response.status == 200:
+            await rcon_command(f"say Saved data for the last round")
+            cls.current_round = Round(cls.current_set)
+        else:
+            await rcon_command(f"Unable to save data for the last round, status code: {response.status}")
+            log.error(f"Unable to save data for a ended tracked round, data sent: \"{api_round_players}\", "
+                      f"received response: \"{response.status}\", \"{response.json}\"")
